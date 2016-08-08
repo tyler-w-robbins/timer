@@ -37,43 +37,65 @@ var routes = Routes{
 	Route{
 		"TimerIndex",
 		"GET",
-		"/timers",
+		"/status",
 		TimerIndex,
 	},
 	Route{
-		"TimerShow",
-		"GET",
-		"/timers/{timerId}",
-		TimerShow,
+		"TimerStart",
+		"POST",
+		"/start",
+		TimerStart,
 	},
 	Route{
-		"TimerCreate",
+		"TimerStop",
 		"POST",
-		"/timers",
-		TimerCreate,
+		"/stop",
+		TimerStop,
 	},
 }
 
+//
+// func loadPage(title string) (*Page, error) {
+// 	filename := "start.json"
+// 	body, err := OPioutil.ReadFile(filename)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &Page{Title: title, Timer: body}, nil
+// }
+
 func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome!")
+	title := r.URL.Path[len("/edit/"):]
+	fmt.Fprintf(w, "<h1>Editing %s</h1>"+
+		"<form action=\"/save/%s\" method=\"POST\">"+
+		"<textarea name=\"body\">%s</textarea><br>"+
+		"<input type=\"submit\" value=\"Save\">"+
+		"</form>",
+		p.Title, p.Title, p.Timer)
 }
 
 func TimerIndex(w http.ResponseWriter, r *http.Request) {
 	pages := Pages{
-		Page{Title: "Write presentation"},
+		Page{Title: "Write presentation", Timer: time.Now()},
 		Page{Title: "Host meetup"},
 	}
 
 	json.NewEncoder(w).Encode(pages)
 }
 
-func TimerShow(w http.ResponseWriter, r *http.Request) {
+// func TimerShow(w http.ResponseWriter, r *http.Request) {
+// 	// vars := mux.Vars(r)
+// 	// todoId := vars["todoId"]
+// 	fmt.Fprintf(w, "Todo show: %s", r.URL.Path[1:])
+// }
+
+func TimerStart(w http.ResponseWriter, r *http.Request) {
 	// vars := mux.Vars(r)
 	// todoId := vars["todoId"]
 	fmt.Fprintf(w, "Todo show: %s", r.URL.Path[1:])
 }
 
-func TimerCreate(w http.ResponseWriter, r *http.Request) {
+func TimerStop(w http.ResponseWriter, r *http.Request) {
 	// vars := mux.Vars(r)
 	// todoId := vars["todoId"]
 	fmt.Fprintf(w, "Todo show: %s", r.URL.Path[1:])
@@ -82,7 +104,7 @@ func TimerCreate(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/todos", TimerIndex)
-	http.HandleFunc("/todos/", TimerShow)
+	http.HandleFunc("/todos/", TimerStart)
 
 	http.ListenAndServe(":8080", nil)
 	// log.Fatal(http.ListenAndServe(":8080", router))
