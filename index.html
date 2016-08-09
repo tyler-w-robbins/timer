@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html>
+<head>
+  <title>quack</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    $("button").click(function(){
+        $.getJSON("demo_ajax_json.js", function(result){
+            $.each(result, function(i, field){
+                $("div").append(field + " ");
+            });
+        });
+    });
+});
+</script>
+</head>
 <body>
 
-<p>A script on this page starts this clock:</p>
+<button>Get JSON data</button>
 
-<p id="demo"></p>
-
-<script>
-var myVar = setInterval(myTimer, 1000);
-
-function myTimer() {
-    var d = new Date();
-    document.getElementById("demo").innerHTML = d.toLocaleTimeString();
-}
-</script>
+<div></div>
 
 </body>
 </html>

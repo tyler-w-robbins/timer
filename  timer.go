@@ -1,113 +1,39 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
+	"html/template"
 	"net/http"
-	"regexp"
 	"time"
 )
 
-//var templates = template.Must(template.ParseFiles("edit.html", "view.html"))
-var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
+var templates = template.Must(template.ParseFiles("index.html"))
 
-type Page struct {
-	Title   string    `json:"title"`
-	Created bool      `json:"created"`
-	Timer   time.Time `json:"timer"`
-}
-
-type Route struct {
-	Name        string
-	Method      string
-	Pattern     string
-	HandlerFunc http.HandlerFunc
-}
-
-type Pages []Page
-type Routes []Route
-
-var routes = Routes{
-	Route{
-		"Index",
-		"GET",
-		"/",
-		Index,
-	},
-	Route{
-		"TimerIndex",
-		"GET",
-		"/status",
-		TimerIndex,
-	},
-	Route{
-		"TimerStart",
-		"POST",
-		"/start",
-		TimerStart,
-	},
-	Route{
-		"TimerStop",
-		"POST",
-		"/stop",
-		TimerStop,
-	},
-}
-
-//
-// func loadPage(title string) (*Page, error) {
-// 	filename := "start.json"
-// 	body, err := OPioutil.ReadFile(filename)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &Page{Title: title, Timer: body}, nil
+// type Page struct {
+// 	Title   string    `json:"title"`
+// 	Created bool      `json:"created"`
+// 	Timer   time.Time `json:"timer"`
 // }
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	title := r.URL.Path[len("/edit/"):]
-	fmt.Fprintf(w, "<h1>Editing %s</h1>"+
-		"<form action=\"/save/%s\" method=\"POST\">"+
-		"<textarea name=\"body\">%s</textarea><br>"+
-		"<input type=\"submit\" value=\"Save\">"+
-		"</form>",
-		p.Title, p.Title, p.Timer)
+type Status struct {
+	Name    string    `json:"name"`
+	Running bool      `json:"running"`
+	Seconds time.Time `json:"seconds"` // make integer
 }
 
-func TimerIndex(w http.ResponseWriter, r *http.Request) {
-	pages := Pages{
-		Page{Title: "Write presentation", Timer: time.Now()},
-		Page{Title: "Host meetup"},
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	p := Status{Name: "foo", Running: true, Seconds: time.Now()}
+	err := templates.ExecuteTemplate(w, "index.html", p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-
-	json.NewEncoder(w).Encode(pages)
 }
 
-// func TimerShow(w http.ResponseWriter, r *http.Request) {
-// 	// vars := mux.Vars(r)
-// 	// todoId := vars["todoId"]
-// 	fmt.Fprintf(w, "Todo show: %s", r.URL.Path[1:])
-// }
-
-func TimerStart(w http.ResponseWriter, r *http.Request) {
-	// vars := mux.Vars(r)
-	// todoId := vars["todoId"]
-	fmt.Fprintf(w, "Todo show: %s", r.URL.Path[1:])
-}
-
-func TimerStop(w http.ResponseWriter, r *http.Request) {
-	// vars := mux.Vars(r)
-	// todoId := vars["todoId"]
-	fmt.Fprintf(w, "Todo show: %s", r.URL.Path[1:])
-}
+func ajaxHandler(w http.ResponseWriter, r *http.Request) {}
 
 func main() {
-	http.HandleFunc("/", Index)
-	http.HandleFunc("/todos", TimerIndex)
-	http.HandleFunc("/todos/", TimerStart)
-
+	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/ajax", ajaxHandler)
 	http.ListenAndServe(":8080", nil)
-	// log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 // func main() {
