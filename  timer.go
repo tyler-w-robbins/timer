@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
+	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -20,18 +22,26 @@ type Status struct {
 	Seconds time.Time `json:"seconds"` // make integer
 }
 
+var t0 = time.Now()
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	p := Status{Name: "foo", Running: true, Seconds: time.Now()}
-	err := templates.ExecuteTemplate(w, "index.html", p)
+	// p := Status{Name: "foo", Running: true, Seconds: time.Now()}
+	// err := templates.ExecuteTemplate(w, "index.html", p)
+	file, err := ioutil.ReadFile("index.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	htmlString := string(file)
+	fmt.Fprint(w, htmlString)
 }
 
-func ajaxHandler(w http.ResponseWriter, r *http.Request) {}
+func ajaxHandler(w http.ResponseWriter, r *http.Request) {
+	t1 := time.Now()
+	fmt.Fprint(w, t1.Sub(t0))
+}
 
 func main() {
-	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/time", indexHandler)
 	http.HandleFunc("/ajax", ajaxHandler)
 	http.ListenAndServe(":8080", nil)
 }

@@ -1,25 +1,26 @@
-<!DOCTYPE html>
 <html>
-<head>
-  <title>quack</title>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script>
-$(document).ready(function(){
-    $("button").click(function(){
-        $.getJSON("demo_ajax_json.js", function(result){
-            $.each(result, function(i, field){
-                $("div").append(field + " ");
+
+   <head>
+      <title>The jQuery Example</title>
+      <script type = "text/javascript"
+         src = "http://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+      <script type = "text/javascript" language = "javascript">
+            $(document).ready(function () {
+              $("#output").append("Waiting for system time..");
+              setInterval("delayedPost()", 1000);
             });
-        });
-    });
-});
-</script>
-</head>
-<body>
-
-<button>Get JSON data</button>
-
-<div></div>
-
-</body>
+            function delayedPost() {
+              $.post("http://localhost:8080/ajax", "", function(data, status) {
+              $("#output").empty();
+              $("#output").append(data);
+              });
+            }
+      </script>
+   </head>
+   <body>
+      <div id = "output" style = "background-color:#586F6B; width:15em;">
+      </div>
+      <input type = "button" id = "driver" value = "Start" />
+   </body>
 </html>
