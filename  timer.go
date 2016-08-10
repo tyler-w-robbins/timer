@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"time"
 )
 
@@ -22,11 +23,12 @@ type Status struct {
 	Seconds time.Time `json:"seconds"` // make integer
 }
 
+var statusArray = []Status{}
+
+// var enc = json.NewEncoder(os.OpenFile("status.json"))
 var t0 = time.Now()
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	// p := Status{Name: "foo", Running: true, Seconds: time.Now()}
-	// err := templates.ExecuteTemplate(w, "index.html", p)
 	file, err := ioutil.ReadFile("index.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -35,14 +37,24 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, htmlString)
 }
 
-func ajaxHandler(w http.ResponseWriter, r *http.Request) {
+func statusHandler(w http.ResponseWriter, r *http.Request) {
 	t1 := time.Now()
 	fmt.Fprint(w, t1.Sub(t0))
 }
 
+func startHandler(w http.ResponseWriter, r *http.Request) {
+	t1 := time.Now()
+	fmt.Fprint(w, t1.Sub(t0))
+}
+
+func stopHandler(w http.ResponseWriter, r *http.Request) {}
+
 func main() {
-	http.HandleFunc("/time", indexHandler)
-	http.HandleFunc("/ajax", ajaxHandler)
+	fmt.Println(reflect.TypeOf(statusArray))
+	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/status", statusHandler)
+	http.HandleFunc("/start", startHandler)
+	http.HandleFunc("/stop", stopHandler)
 	http.ListenAndServe(":8080", nil)
 }
 
