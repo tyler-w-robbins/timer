@@ -10,6 +10,8 @@
             setInterval("delayedPost()", 1000);
             $("#driver").click(function() {
                 $("#driver").val("Stop");
+                $.post("http://localhost:8080/start", $("#name").val());
+                alert("Value: " + $("#name").val());
             });
         });
 

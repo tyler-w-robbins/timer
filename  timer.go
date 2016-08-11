@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"reflect"
 	"time"
@@ -44,6 +45,9 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 func startHandler(w http.ResponseWriter, r *http.Request) {
 	t1 := time.Now()
+	r.ParseForm()
+	log.Println(r.Form)
+	fmt.Println(r.PostFormValue("name"))
 	fmt.Fprint(w, t1.Sub(t0))
 }
 
