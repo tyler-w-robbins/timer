@@ -10,13 +10,12 @@
             setInterval("delayedPost()", 1000);
             $("#driver").click(function() {
                 $("#driver").val("Stop");
-                $.post("http://localhost:8080/start", $("#name").val());
-                alert("Value: " + $("#name").val());
+                $.post("http://localhost:8080/start", {name: $("input[name='s']").val()});
             });
         });
 
         function delayedPost() {
-            $.post("http://localhost:8080/status", "", function(data, status) {
+            $.post("http://localhost:8080/status", {name: $("input[name='s']").val()}, function(data, status) {
                 $("#output").empty();
                 $("#output").append(data);
             });
@@ -25,7 +24,7 @@
 </head>
 
 <body>
-    <p>Timer: <input type="text" id="name"></p>
+    <p>Timer: <input type="text" name = "s" id="name"></p>
     <div id="output"></div>
     <input type="submit" id="driver" value="Start" />
 </body>

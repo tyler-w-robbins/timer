@@ -6,17 +6,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"reflect"
 	"time"
 )
 
 var templates = template.Must(template.ParseFiles("index.html"))
-
-// type Page struct {
-// 	Title   string    `json:"title"`
-// 	Created bool      `json:"created"`
-// 	Timer   time.Time `json:"timer"`
-// }
 
 type Status struct {
 	Name    string    `json:"name"`
@@ -24,7 +17,8 @@ type Status struct {
 	Seconds time.Time `json:"seconds"` // make integer
 }
 
-var statusArray = []Status{}
+var statii []*Status
+var statusMap = make(map[string]Status)
 
 // var enc = json.NewEncoder(os.OpenFile("status.json"))
 var t0 = time.Now()
@@ -39,25 +33,47 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
-	t1 := time.Now()
-	fmt.Fprint(w, t1.Sub(t0))
-}
-
-func startHandler(w http.ResponseWriter, r *http.Request) {
-	t1 := time.Now()
+	// t1 := time.Now()
 	r.ParseForm()
 	log.Println(r.Form)
-	fmt.Println(r.PostFormValue("name"))
-	fmt.Fprint(w, t1.Sub(t0))
+	tempName := r.Form.Get("name")
+	if _, ok := statusMap[tempName]; ok {
+		t1 := time.Now()
+		fmt.Fprint(w, t1.Sub(statusMap[tempName].Seconds))
+	} else {
+		fmt.Fprint(w, "not a timer")
+	}
+	// for i := range statusArray {
+	// 	if statusArray[i].Name == tempName {
+	// 		t1 := time.Now()
+	// 		fmt.Println("success")
+	// 		fmt.Fprint(w, t1.Sub(statusArray[i].Seconds))
+	// 	}
+	// }
+
 }
+
+// func startHandler(w http.ResponseWriter, r *http.Request) {
+// 	t1 := time.Now()
+// 	r.ParseForm()
+// 	log.Println(r.Form)
+// 	newStatus := new(Status)
+// 	newStatus.Name = r.Form.Get("name")
+// 	newStatus.Running = true
+// 	newStatus.Seconds = time.Now()
+// 	fmt.Println(newStatus.Name)
+// 	//fmt.Println(r.PostFormValue("name"))
+// 	fmt.Fprint(w, t1.Sub(t0))
+// }
 
 func stopHandler(w http.ResponseWriter, r *http.Request) {}
 
 func main() {
-	fmt.Println(reflect.TypeOf(statusArray))
+	statusMap["systest"] = Status{Running: true, Seconds: time.Now()}
+	// fmt.Println(reflect.TypeOf(statusArray))
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/status", statusHandler)
-	http.HandleFunc("/start", startHandler)
+	// http.HandleFunc("/start", startHandler)
 	http.HandleFunc("/stop", stopHandler)
 	http.ListenAndServe(":8080", nil)
 }
