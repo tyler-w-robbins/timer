@@ -9,8 +9,11 @@
             $("#output").append("0m00s");
             setInterval("delayedPost()", 1000);
             $("#driver").click(function() {
-                $("#driver").val("Stop");
+              if($("#output:contains('not a timer')").length){
                 $.post("http://localhost:8080/start", {name: $("input[name='s']").val()});
+              } else {
+                $.post("http://localhost:8080/stop", {name: $("input[name='s']").val()});
+              }
             });
         });
 
@@ -19,6 +22,11 @@
                 $("#output").empty();
                 $("#output").append(data);
             });
+            if($("#output:contains('not a timer')").length){
+              $("#driver").val("Start");
+            } else {
+              $("#driver").val("Stop");
+            }
         }
     </script>
 </head>

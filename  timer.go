@@ -20,9 +20,6 @@ type Status struct {
 var statii []*Status
 var statusMap = make(map[string]Status)
 
-// var enc = json.NewEncoder(os.OpenFile("status.json"))
-var t0 = time.Now()
-
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	file, err := ioutil.ReadFile("index.html")
 	if err != nil {
@@ -38,35 +35,37 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Form)
 	tempName := r.Form.Get("name")
 	if _, ok := statusMap[tempName]; ok {
-		t1 := time.Now()
-		fmt.Fprint(w, t1.Sub(statusMap[tempName].Seconds))
+		if statusMap[tempName].Running == true {
+			t1 := time.Now()
+			fmt.Fprint(w, t1.Sub(statusMap[tempName].Seconds))
+		} else {
+			fmt.Fprint(w, statusMap[tempName].Seconds)
+		}
+
 	} else {
 		fmt.Fprint(w, "not a timer")
 	}
-	// for i := range statusArray {
-	// 	if statusArray[i].Name == tempName {
-	// 		t1 := time.Now()
-	// 		fmt.Println("success")
-	// 		fmt.Fprint(w, t1.Sub(statusArray[i].Seconds))
-	// 	}
-	// }
 
 }
 
-// func startHandler(w http.ResponseWriter, r *http.Request) {
-// 	t1 := time.Now()
-// 	r.ParseForm()
-// 	log.Println(r.Form)
-// 	newStatus := new(Status)
-// 	newStatus.Name = r.Form.Get("name")
-// 	newStatus.Running = true
-// 	newStatus.Seconds = time.Now()
-// 	fmt.Println(newStatus.Name)
-// 	//fmt.Println(r.PostFormValue("name"))
-// 	fmt.Fprint(w, t1.Sub(t0))
-// }
+func startHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	log.Println(r.Form)
+	tempName := r.Form.Get("name")
+	t1 := time.Now()
+	t2 := t1.Truncate(t1.Sub(statusMap[tempName].Seconds))
+	statusMap[tempName] = Status{Running: true, Seconds: t2}
+	fmt.Fprint(w, statusMap[tempName].Seconds)
+}
 
-func stopHandler(w http.ResponseWriter, r *http.Request) {}
+func stopHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	log.Println(r.Form)
+	tempName := r.Form.Get("name")
+	t1 := time.Now()
+	statusMap[tempName] = Status{Running: false, Seconds: time.Now()}
+	fmt.Fprint(w, t1.Sub(statusMap[tempName].Seconds))
+}
 
 func main() {
 	statusMap["systest"] = Status{Running: true, Seconds: time.Now()}
