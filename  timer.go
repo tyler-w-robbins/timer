@@ -12,9 +12,10 @@ import (
 var templates = template.Must(template.ParseFiles("index.html"))
 
 type Status struct {
-	Name    string    `json:"name"`
-	Running bool      `json:"running"`
-	Seconds time.Time `json:"seconds"` // make integer
+	Name    string        `json:"name"`
+	Running bool          `json:"running"`
+	Seconds time.Time     `json:"seconds"` // make integer
+	StopDur time.Duration `json:"seconds"`
 }
 
 var statii []*Status
@@ -30,7 +31,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
-	// t1 := time.Now()
 	r.ParseForm()
 	log.Println(r.Form)
 	tempName := r.Form.Get("name")
@@ -39,7 +39,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 			t1 := time.Now()
 			fmt.Fprint(w, t1.Sub(statusMap[tempName].Seconds))
 		} else {
-			fmt.Fprint(w, statusMap[tempName].Seconds)
+			fmt.Fprint(w, statusMap[tempName].StopDur)
 		}
 
 	} else {
@@ -53,8 +53,7 @@ func startHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Form)
 	tempName := r.Form.Get("name")
 	t1 := time.Now()
-	t2 := t1.Truncate(t1.Sub(statusMap[tempName].Seconds))
-	statusMap[tempName] = Status{Running: true, Seconds: t2}
+	statusMap[tempName] = Status{Running: true, Seconds: t1}
 	fmt.Fprint(w, statusMap[tempName].Seconds)
 }
 
@@ -63,7 +62,7 @@ func stopHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Form)
 	tempName := r.Form.Get("name")
 	t1 := time.Now()
-	statusMap[tempName] = Status{Running: false, Seconds: time.Now()}
+	statusMap[tempName] = Status{Running: false, StopDur: t1.Sub(statusMap[tempName].Seconds)}
 	fmt.Fprint(w, t1.Sub(statusMap[tempName].Seconds))
 }
 
@@ -72,7 +71,7 @@ func main() {
 	// fmt.Println(reflect.TypeOf(statusArray))
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/status", statusHandler)
-	// http.HandleFunc("/start", startHandler)
+	http.HandleFunc("/start", startHandler)
 	http.HandleFunc("/stop", stopHandler)
 	http.ListenAndServe(":8080", nil)
 }
