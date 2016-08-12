@@ -6,10 +6,10 @@
 
     <script type="text/javascript" language="javascript">
         $(document).ready(function() {
-            $("#output").append("0m00s");
+            $("#output").append("0m0s");
             setInterval("delayedPost()", 1000);
             $("#driver").click(function() {
-              if($("#output:contains('not a timer')").length){
+              if($("#output:contains('0m0s')").length || $("#output:contains('paused')").length){
                 $.post("http://localhost:8080/start", {name: $("input[name='s']").val()});
               } else {
                 $.post("http://localhost:8080/stop", {name: $("input[name='s']").val()});
@@ -20,13 +20,17 @@
         function delayedPost() {
             $.post("http://localhost:8080/status", {name: $("input[name='s']").val()}, function(data, status) {
                 $("#output").empty();
+                if (/stop/i.test(data)){
+                  $("#driver").val("Start");
+                $("#output").append(data.replace("stop", ""));
+              } else if (/start/i.test(data)){
+                  $("#driver").val("Stop");
+                $("#output").append(data.replace("start", ""));
+              }else {
                 $("#output").append(data);
+                $("#driver").val("Start");
+              }
             });
-            if($("#output:contains('not a timer')").length){
-              $("#driver").val("Start");
-            } else {
-              $("#driver").val("Stop");
-            }
         }
     </script>
 </head>

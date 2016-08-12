@@ -37,13 +37,15 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	if _, ok := statusMap[tempName]; ok {
 		if statusMap[tempName].Running == true {
 			t1 := time.Now()
-			fmt.Fprint(w, t1.Sub(statusMap[tempName].Seconds))
+			fmt.Fprint(w, (statusMap[tempName].StopDur+t1.Sub(statusMap[tempName].Seconds)).String()+"start")
+		} else if statusMap[tempName].StopDur > 0 {
+			fmt.Fprint(w, statusMap[tempName].StopDur.String()+" - pausedstop")
 		} else {
-			fmt.Fprint(w, statusMap[tempName].StopDur)
+			fmt.Fprint(w, statusMap[tempName].StopDur.String()+"stop")
 		}
 
 	} else {
-		fmt.Fprint(w, "not a timer")
+		fmt.Fprint(w, "0m0s")
 	}
 
 }
@@ -53,8 +55,13 @@ func startHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Form)
 	tempName := r.Form.Get("name")
 	t1 := time.Now()
-	statusMap[tempName] = Status{Running: true, Seconds: t1}
-	fmt.Fprint(w, statusMap[tempName].Seconds)
+	if statusMap[tempName].StopDur > 0 {
+		statusMap[tempName] = Status{Running: true}
+		log.Println(statusMap[tempName].StopDur)
+	} else {
+		statusMap[tempName] = Status{Running: true, Seconds: t1}
+	}
+	fmt.Fprint(w, statusMap[tempName].Seconds.String()+"start")
 }
 
 func stopHandler(w http.ResponseWriter, r *http.Request) {
@@ -62,8 +69,8 @@ func stopHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Form)
 	tempName := r.Form.Get("name")
 	t1 := time.Now()
-	statusMap[tempName] = Status{Running: false, StopDur: t1.Sub(statusMap[tempName].Seconds)}
-	fmt.Fprint(w, t1.Sub(statusMap[tempName].Seconds))
+	statusMap[tempName] = Status{Running: false, Seconds: t1, StopDur: t1.Sub(statusMap[tempName].Seconds)}
+	fmt.Fprint(w, t1.Sub(statusMap[tempName].Seconds).String()+" - pausedstop")
 }
 
 func main() {
