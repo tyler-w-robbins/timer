@@ -43,7 +43,6 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			fmt.Fprint(w, statusMap[tempName].StopDur.String()+"stop")
 		}
-
 	} else {
 		fmt.Fprint(w, "0m0s")
 	}
@@ -56,7 +55,10 @@ func startHandler(w http.ResponseWriter, r *http.Request) {
 	tempName := r.Form.Get("name")
 	t1 := time.Now()
 	if statusMap[tempName].StopDur > 0 {
-		statusMap[tempName] = Status{Running: true}
+		tempStat := statusMap[tempName]
+		tempStat.Seconds = t1
+		tempStat.Running = true
+		statusMap[tempName] = tempStat
 		log.Println(statusMap[tempName].StopDur)
 	} else {
 		statusMap[tempName] = Status{Running: true, Seconds: t1}
@@ -69,7 +71,7 @@ func stopHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Form)
 	tempName := r.Form.Get("name")
 	t1 := time.Now()
-	statusMap[tempName] = Status{Running: false, Seconds: t1, StopDur: t1.Sub(statusMap[tempName].Seconds)}
+	statusMap[tempName] = Status{Running: false, Seconds: t1, StopDur: (statusMap[tempName].StopDur + t1.Sub(statusMap[tempName].Seconds))}
 	fmt.Fprint(w, t1.Sub(statusMap[tempName].Seconds).String()+" - pausedstop")
 }
 
@@ -82,27 +84,3 @@ func main() {
 	http.HandleFunc("/stop", stopHandler)
 	http.ListenAndServe(":8080", nil)
 }
-
-// func main() {
-// 	http.HandleFunc("/addtimer/", makeHandler(addHandler))
-// ticker := time.NewTicker(time.Second)
-// go func() {
-// 	for t := range ticker.C {
-// 		fmt.Println("Tick at", t.String())
-// 	}
-// }()
-//
-// time.Sleep(time.Second * 5)
-// ticker.Stop()
-// fmt.Println("Ticker stopped")
-
-// enc := json.NewEncoder(os.OpenFile())
-// d := map[string]int{"apple": 5, "lettuce": 7}
-// enc.Encode(d)
-
-// t0 := time.Now()
-// fmt.Println(reflect.TypeOf(t0))
-// time.Sleep(time.Second * 5)
-// t1 := time.Now()
-// fmt.Printf("The call took %v to run.\n", t1.Sub(t0))
-// }
